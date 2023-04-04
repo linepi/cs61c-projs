@@ -123,7 +123,7 @@ print_char:
 #   a1 = filepath
 #   a2 = permissions (0, 1, 2, 3, 4, 5 = r, w, a, r+, w+, a+)
 # return:
-#   a0 = file descriptor
+#   a0 = file descriptor, -1 on failure
 #================================================================
 fopen:
     li a0 c_openFile

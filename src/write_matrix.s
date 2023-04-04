@@ -24,19 +24,79 @@
 # If you receive an fclose error or eof,
 # this function exits with error code 55.
 # ==============================================================================
+
 write_matrix:
-
+    addi sp, sp, -28
+    sw ra, 24(sp)
+    sw s0, 20(sp)
+    sw s1, 16(sp)
+    sw s2, 12(sp)
+    sw s3, 8(sp)
+    sw s4, 4(sp)
+    sw s5, 0(sp)
     # Prologue
+    mv s0, a0
+    mv s1, a1
+    mv s2, a2
+    mv s3, a3
+    
+    # open file 
+    mv a1, s0
+    li a2, 1 # r permission
+    jal ra, fopen
+    li t0, -1
+    beq a0, t0, error53
+    addi sp, sp, -4
+    sw a0, 0(sp) # fd
+    
+    # file write(row and column)
+    lw a1, 0(sp)
+    addi sp, sp, -8
+    sw s2, 0(sp)
+    sw s3, 4(sp)
+    mv a2, sp
+    li a3, 2
+    li a4, 4
+    jal ra, fwrite
+    li t0, 2
+    bne a0, t0, error54
 
+    # file write(matrix content)
+    lw a1, 8(sp)
+    mv a2, s1
+    mul a3, s2, s3
+    li a4, 4
+    jal ra, fwrite
+    mul t0, s2, s3
+    bne a0, t0, error54
 
+    # file close
+    lw a1, 8(sp) 
+    jal ra, fclose
+    li t0, -1
+    beq a0, t0, error55
 
-
-
-
-
-
-
+    # end
+    addi sp, sp, 12
     # Epilogue
-
-
+    lw s5, 0(sp)
+    lw s4, 4(sp) 
+    lw s3, 8(sp)
+    lw s2, 12(sp)
+    lw s1, 16(sp)
+    lw s0, 20(sp)
+    lw ra, 24(sp)
+    addi sp, sp, 28
     ret
+error53:
+    li a1, 53
+    li a0, 17
+    ecall
+error54:
+    li a1, 54
+    li a0, 17
+    ecall
+error55:
+    li a1, 55
+    li a0, 17
+    ecall
